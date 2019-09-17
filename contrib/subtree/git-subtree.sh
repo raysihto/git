@@ -27,6 +27,7 @@ b,branch=     create a new branch from the split subtree
 ignore-joins  ignore prior --rejoin commits
 onto=         try connecting new tree to an existing one
 rejoin        merge the new branch back into HEAD
+allow-empty   allow empty directory
  options for 'add', 'merge', and 'pull'
 squash        merge subtree changes as a single commit
 "
@@ -48,6 +49,7 @@ annotate=
 squash=
 message=
 prefix=
+allow_empty=
 
 debug () {
 	if test -n "$debug"
@@ -142,6 +144,12 @@ do
 		;;
 	--no-squash)
 		squash=
+		;;
+	--allow-empty)
+		allow_empty=1
+		;;
+	--no-allow-empty)
+		allow_empty=
 		;;
 	--)
 		break
@@ -664,7 +672,10 @@ process_split_commit () {
 
 	# ugly.  is there no better way to tell if this is a subtree
 	# vs. a mainline commit?  Does it matter?
-	if test -z "$tree"
+	if test -z "$tree" -a -n "$allow_empty"
+	then
+		tree='4b825dc642cb6eb9a060e54bf8d69288fbee4904'
+	elif test -z "$tree"
 	then
 		set_notree "$rev"
 		if test -n "$newparents"
